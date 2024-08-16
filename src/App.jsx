@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const name = "Ryan John Otineo";
+import Footer from "./Footer";
 
 export default function App() {
   const api = import.meta.env.VITE_REACT_API_INFO;
@@ -7,6 +7,14 @@ export default function App() {
   const [inputName, setInputName] = useState("");
   const [inputAge, setInputAge] = useState("");
   const [InputFile, setInputFile] = useState("");
+
+  const [mount,setMount] = useState(null);
+
+  const clearFields = () =>{
+    setInputName(inputName=>"");
+    setInputAge(inputAge=>"");
+    setInputFile(InputFile=>"");
+  }
 
   useEffect(() => {
     fetch(api)
@@ -16,7 +24,7 @@ export default function App() {
         setInfo((infos) => data);
       })
       .catch((error) => console.log("Error", error));
-  }, []);
+  }, [mount]);
 
   const handleName = (e) => {
     setInputName((inputName) => e.target.value);
@@ -64,15 +72,19 @@ export default function App() {
         image: InputFile,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        response.json()
+        if(response.ok){
+          setMount(mount=>"Submited");
+          clearFields();
+        }
+      })
       .then((data) => {
         console.log(data);
       })
       .catch((error) => {
         console.log("Error", error);
       });
-
-    
   };
 
   //Handling Deleting characters
@@ -83,7 +95,12 @@ export default function App() {
     fetch(`${api}/${id}`, {
       method: "DELETE",
     })
-      .then((response) => response.json())
+      .then((response) => {
+        response.json()
+          if(response.ok){
+            setMount(mount=>"Deleted")
+          }
+      })
       .then((data) => console.log(data));
   };
 
@@ -116,8 +133,9 @@ export default function App() {
         />
         <br />
         <div className="d-grid">
-          <button className="btn btn-warning" type="submit">
-            Submit
+          <button className="btn btn-success" type="submit">
+            Upload &nbsp;
+            <i className="fa-solid fa-globe" style={{color: "#ffffff"}}></i>
           </button>
         </div>
       </form>
@@ -135,8 +153,11 @@ export default function App() {
                   value={info._id}
                   onClick={deleteCharacter}
                 >
-                  
-                  Remove <i className="fa-solid fa-trash-can" style={{color: "#fafafa"}}></i>
+                  Remove{" "}
+                  <i
+                    className="fa-solid fa-trash-can"
+                    style={{ color: "#fafafa" }}
+                  ></i>
                 </button>
               </div>
             </div>
@@ -144,6 +165,7 @@ export default function App() {
           </div>
         ))}
       </div>
+      <Footer />
     </div>
   );
 }
